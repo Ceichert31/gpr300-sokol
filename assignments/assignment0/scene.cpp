@@ -8,8 +8,6 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "ew/texture.h"
-
 // batteries
 #include "batteries/opengl.h"
 
@@ -27,9 +25,8 @@ Scene::Scene()
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
 
     blinnphong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
-
-    //GLuint bananaTexture = ew::loadTexture("assets/SingleBanana.png");
-
+   
+    rockTexture = std::make_unique<ew::Texture>("assets/textures/Rock.jpg");
 
     light = {
         .brightness = 1.0f,
@@ -65,9 +62,14 @@ void Scene::Render(void)
     glEnable(GL_DEPTH_TEST);
     // glDisable(GL_DEPTH_TEST);
 
+     //Set rock texture
+    glBindTextureUnit(0, rockTexture->getID());
+
     blinnphong->use();
 
     // scene matrices
+
+    blinnphong->setInt("main_texture", 0);
     blinnphong->setMat4("model", objectMatrix);
     blinnphong->setMat4("view_proj", view_proj);
     blinnphong->setVec3("camera", camera.position);

@@ -25,6 +25,8 @@ uniform vec3 camera;
 uniform Light light;
 uniform Material material;
 uniform float alpha;
+uniform sampler2D main_texture;
+
 
 vec3 blinnphong(vec3 normal, vec3 frag_pos, Light light) {
   float angle = normalize(dot(normal, light.position));
@@ -52,5 +54,5 @@ void main()
   vec3 lighting = blinnphong(vs_normal, vs_position, light);
   vec3 object_color = vs_normal.rgb * 0.5 + 0.5;
   vec3 result = lighting * object_color;
-  FragColor = vec4(result, 1.0);
+  FragColor = vec4(result, 1.0) * texture(main_texture, vs_texcoord);
 }
