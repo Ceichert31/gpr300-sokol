@@ -35,4 +35,5 @@
 		"valarray": "cpp",
 		"*.inc": "cpp"
 	},
+	"editor.formatOnSave": true
 }
