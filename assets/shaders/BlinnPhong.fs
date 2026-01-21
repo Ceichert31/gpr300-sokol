@@ -24,11 +24,15 @@ struct Material{
 uniform vec3 camera;
 uniform Light light;
 uniform Material material;
-uniform float alpha;
 uniform sampler2D main_texture;
+uniform sampler2D normal_map;
 
+vec3 blinnphong(vec3 frag_pos, Light light) {
+  //Sample normal map
+  vec3 normal = texture(normal_map, vs_texcoord).rgb;
+  normal = normalize(normal * 2.0 - 1.0);
 
-vec3 blinnphong(vec3 normal, vec3 frag_pos, Light light) {
+  //Get dot between light and normal
   float angle = normalize(dot(normal, light.position));
 
   vec3 view_dir = normalize(camera - frag_pos);
@@ -41,7 +45,7 @@ vec3 blinnphong(vec3 normal, vec3 frag_pos, Light light) {
 
   //Calculate specular lighting
   float specular = max(dot(normal, half_dir), 0);
-  specular = pow(specular, alpha * material.shininess);
+  specular = pow(specular, 128 * material.shininess);
 
   //Our uncolored lighting model
   vec3 lighting = diffuse * material.diffuse + specular * material.specular + material.ambient;
@@ -51,8 +55,6 @@ vec3 blinnphong(vec3 normal, vec3 frag_pos, Light light) {
 
 void main()
 {
-  vec3 lighting = blinnphong(vs_normal, vs_position, light);
-  vec3 object_color = vs_normal.rgb * 0.5 + 0.5;
-  vec3 result = lighting * object_color;
-  FragColor = vec4(result, 1.0) * texture(main_texture, vs_texcoord);
+  vec3 lighting = blinnphong(vs_position, light);
+  FragColor = vec4(lighting, 1.0) * texture(main_texture, vs_texcoord);
 }

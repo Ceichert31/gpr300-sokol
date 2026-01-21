@@ -14,7 +14,7 @@
 glm::mat4 lightMatrix = glm::mat4(1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
 
-const glm::vec4 backgroundColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
+const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
 struct{
     float alpha = 128.0f;
@@ -62,7 +62,7 @@ void Scene::Render(void)
     glEnable(GL_DEPTH_TEST);
     // glDisable(GL_DEPTH_TEST);
 
-     //Set rock texture
+    //Set rock texture
     glBindTextureUnit(0, rockTexture->getID());
 
     blinnphong->use();
@@ -75,11 +75,11 @@ void Scene::Render(void)
     blinnphong->setVec3("camera", camera.position);
     blinnphong->setVec3("light.position", light.position);
     blinnphong->setVec3("light.color", light.color);
-    blinnphong->setFloat("alpha", debug.alpha);
+    blinnphong->setFloat("material.shininess", debug.alpha);
 
     blinnphong->setVec3("material.diffuse", glm::vec3(1));
     blinnphong->setVec3("material.specular", glm::vec3(1));
-    blinnphong->setVec3("material.ambient", backgroundColor / 2.0f);
+    blinnphong->setVec3("material.ambient", backgroundColor * 0.1f);
 
     // draw suzanne
     suzanne->draw();
