@@ -59,20 +59,13 @@ namespace ew {
 			}
 
 			vertex.tangent = glm::vec3(0);
-			vertex.bitangent = glm::vec3(0);
-
+		
 			//Load tanget and bitanget data in vertex data
 			if (aiMesh->HasTangentsAndBitangents()){
 				vertex.tangent = glm::vec3(
 					aiMesh->mTangents[i].x, 
 					aiMesh->mTangents[i].y, 
 					aiMesh->mTangents[i].z
-				);
-
-					vertex.bitangent = glm::vec3(
-					aiMesh->mBitangents[i].x, 
-					aiMesh->mBitangents[i].y, 
-					aiMesh->mBitangents[i].z
 				);
 			}
 			meshData.vertices.push_back(vertex);

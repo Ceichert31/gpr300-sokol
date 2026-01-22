@@ -8,6 +8,7 @@ out vec4 FragColor;
 in vec3 vs_position;
 in vec3 vs_normal;
 in vec2 vs_texcoord;
+in mat3 tangentSpace;
 
 struct Light{
   vec3 color;
