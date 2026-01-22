@@ -21,6 +21,10 @@ void main()
   //Transform to world space coordinates
   vec3 tangent = normalize(vec3(model * vec4(in_tangent, 0.0)));
   vec3 normal = normalize(vec3(model * vec4(in_normal, 0.0)));
+
+  //Use Gram-Schmidt process to re-orthogonalize tangent vector
+  tangent = normalize(tangent - dot(tangent, normal) * normal);
+
   vec3 bitangent = cross(normal, tangent);
 
   //Combine into 3x3 matrix
