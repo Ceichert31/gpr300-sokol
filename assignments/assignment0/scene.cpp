@@ -26,7 +26,8 @@ Scene::Scene()
 
     blinnphong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
    
-    rockTexture = std::make_unique<ew::Texture>("assets/textures/Rock.jpg");
+    mainTexture = std::make_unique<ew::Texture>("assets/textures/Rock.jpg");
+    normalTexture = std::make_unique<ew::Texture>("assets/textures/Rock_Normal.jpg");
 
     light = {
         .brightness = 1.0f,
@@ -62,14 +63,17 @@ void Scene::Render(void)
     glEnable(GL_DEPTH_TEST);
     // glDisable(GL_DEPTH_TEST);
 
-    //Set rock texture
-    glBindTextureUnit(0, rockTexture->getID());
+    //Set main texture
+    glBindTextureUnit(0, mainTexture->getID());
+    //Set normal texture
+    glBindTextureUnit(1, normalTexture->getID());
 
     blinnphong->use();
 
     // scene matrices
 
     blinnphong->setInt("main_texture", 0);
+    blinnphong->setInt("normal_map", 1);
     blinnphong->setMat4("model", objectMatrix);
     blinnphong->setMat4("view_proj", view_proj);
     blinnphong->setVec3("camera", camera.position);

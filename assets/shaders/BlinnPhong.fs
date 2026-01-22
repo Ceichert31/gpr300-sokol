@@ -8,7 +8,7 @@ out vec4 FragColor;
 in vec3 vs_position;
 in vec3 vs_normal;
 in vec2 vs_texcoord;
-in mat3 tangentSpace;
+in mat3 vs_tangent_space;
 
 struct Light{
   vec3 color;
@@ -31,7 +31,8 @@ uniform sampler2D normal_map;
 vec3 blinnphong(vec3 frag_pos, Light light) {
   //Sample normal map
   vec3 normal = texture(normal_map, vs_texcoord).rgb;
-  normal = normalize(normal * 2.0 - 1.0);
+  normal = normal * 2.0 - 1.0;
+  normal = normalize(vs_tangent_space * normal); 
 
   //Get dot between light and normal
   float angle = normalize(dot(normal, light.position));
