@@ -18,20 +18,21 @@ const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
 struct{
     float alpha = 128.0f;
+    bool isNormalMapOn = true;
 } debug;
 
 Scene::Scene()
 {
-    suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
+    suzanne = std::make_unique<ew::Model>("assets/models/sponza.obj");
 
     blinnphong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
    
-    mainTexture = std::make_unique<ew::Texture>("assets/textures/Rock.jpg");
-    normalTexture = std::make_unique<ew::Texture>("assets/textures/Rock_Normal.jpg");
+    mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
+    normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
 
     light = {
         .brightness = 1.0f,
-        .color = {1.0f, 0.0f, 1.0f},
+        .color = {1.0f, 1.0f, 1.0f},
         .position = {2.0f, 2.0f, 2.0f},
     };
 
@@ -74,12 +75,15 @@ void Scene::Render(void)
 
     blinnphong->setInt("main_texture", 0);
     blinnphong->setInt("normal_map", 1);
+
     blinnphong->setMat4("model", objectMatrix);
     blinnphong->setMat4("view_proj", view_proj);
     blinnphong->setVec3("camera", camera.position);
+
     blinnphong->setVec3("light.position", light.position);
     blinnphong->setVec3("light.color", light.color);
     blinnphong->setFloat("material.shininess", debug.alpha);
+    blinnphong->setInt("normalMapOn", debug.isNormalMapOn);
 
     blinnphong->setVec3("material.diffuse", glm::vec3(1));
     blinnphong->setVec3("material.specular", glm::vec3(1));
@@ -120,6 +124,7 @@ void Scene::Debug(void)
     ImGui::Begin("Controlls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
+    ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
     ImGui::ColorEdit3("Light Color", &lightColor.x);
 
     ImGui::Checkbox("Paused", &time.paused);

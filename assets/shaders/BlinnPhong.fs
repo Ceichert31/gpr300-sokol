@@ -27,12 +27,19 @@ uniform Light light;
 uniform Material material;
 uniform sampler2D main_texture;
 uniform sampler2D normal_map;
+uniform bool normalMapOn;
 
 vec3 blinnphong(vec3 frag_pos, Light light) {
-  //Sample normal map
-  vec3 normal = texture(normal_map, vs_texcoord).rgb;
-  normal = normal * 2.0 - 1.0;
-  normal = normalize(vs_tangent_space * normal); 
+
+  vec3 normal = vs_normal;
+
+  //Branching bad, but testing!
+  if (normalMapOn){
+    //Sample normal map
+    normal = texture(normal_map, vs_texcoord).rgb;
+    normal = normal * 2.0 - 1.0;
+    normal = normalize(vs_tangent_space * normal); 
+  }
 
   //Get dot between light and normal
   float angle = normalize(dot(normal, light.position));
