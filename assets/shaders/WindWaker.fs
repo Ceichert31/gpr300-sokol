@@ -47,7 +47,7 @@ vec3 toonshading(vec3 frag_pos, Light light) {
   //Calculate diffuse lighting (light diffusion w/ normal)
   float diffuse = max(dot(normal, light_dir), 0);
 
-  vec3 gradientTex = texture(gradient_texture, vec2(diffuse, 0)).xyz;
+  vec3 gradientTex = texture(gradient_texture, vec2(diffuse)).xyz;
 
   //Calculate specular lighting
   float specular = max(dot(normal, half_dir), 0);
