@@ -21,9 +21,11 @@ class Scene final : public batteries::Scene
 
   private:
     std::unique_ptr<ew::Model> suzanne;
-    std::unique_ptr<ew::Shader> blinnphong;
+    std::unique_ptr<ew::Shader> toon;
     std::unique_ptr<ew::Texture> mainTexture;
     std::unique_ptr<ew::Texture> normalTexture;
+
+    std::unique_ptr<ew::Texture> gradientTexture;
 
     batteries::light_t light;
 };

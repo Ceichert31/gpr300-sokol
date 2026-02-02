@@ -23,12 +23,13 @@ struct{
 
 Scene::Scene()
 {
-    suzanne = std::make_unique<ew::Model>("assets/models/sponza.obj");
+    suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
 
-    blinnphong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
+    toon = std::make_unique<ew::Shader>("assets/shaders/WindWaker.vs", "assets/shaders/WindWaker.fs");
    
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
+    gradientTexture = std::make_unique<ew::Texture>("assets/textures/ZAtoon.png");
 
     light = {
         .brightness = 1.0f,
@@ -68,26 +69,28 @@ void Scene::Render(void)
     glBindTextureUnit(0, mainTexture->getID());
     //Set normal texture
     glBindTextureUnit(1, normalTexture->getID());
+    glBindTextureUnit(2, gradientTexture->getID());
 
-    blinnphong->use();
+    toon->use();
 
     // scene matrices
 
-    blinnphong->setInt("main_texture", 0);
-    blinnphong->setInt("normal_map", 1);
+    toon->setInt("main_texture", 0);
+    toon->setInt("normal_map", 1);
+    toon->setInt("gradient_texture", 2);
 
-    blinnphong->setMat4("model", objectMatrix);
-    blinnphong->setMat4("view_proj", view_proj);
-    blinnphong->setVec3("camera", camera.position);
+    toon->setMat4("model", objectMatrix);
+    toon->setMat4("view_proj", view_proj);
+    toon->setVec3("camera", camera.position);
 
-    blinnphong->setVec3("light.position", light.position);
-    blinnphong->setVec3("light.color", light.color);
-    blinnphong->setFloat("material.shininess", debug.alpha);
-    blinnphong->setInt("normalMapOn", debug.isNormalMapOn);
+    toon->setVec3("light.position", light.position);
+    toon->setVec3("light.color", light.color);
+    toon->setFloat("material.shininess", debug.alpha);
+    toon->setInt("normalMapOn", debug.isNormalMapOn);
 
-    blinnphong->setVec3("material.diffuse", glm::vec3(1));
-    blinnphong->setVec3("material.specular", glm::vec3(1));
-    blinnphong->setVec3("material.ambient", backgroundColor * 0.1f);
+    toon->setVec3("material.diffuse", glm::vec3(1));
+    toon->setVec3("material.specular", glm::vec3(1));
+    toon->setVec3("material.ambient", backgroundColor * 0.1f);
 
     // draw suzanne
     suzanne->draw();
