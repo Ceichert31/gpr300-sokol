@@ -45,10 +45,27 @@ Scene::Scene()
         .color1 = {1.0f, 0.0f, 1.0f},
         .color2 = {0.0f, 0.0f, 1.0f}
     };
+
+    //Allocate frame buffer
+    glCreateFramebuffers(1, &framebuffer);
+
+    //Create image while frame buffer is bound
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    {
+        glGenTextures(1, &fboTexture);
+        glBindTexture(GL_TEXTURE_2D, fboTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    //Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Scene::~Scene()
 {
+    glDeleteFramebuffers(1, &framebuffer);
 }
 
 void Scene::Update(float dt)

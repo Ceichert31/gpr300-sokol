@@ -35,4 +35,7 @@ class Scene final : public batteries::Scene
       glm::vec3 color1;
       glm::vec3 color2;
     } palette;
+
+    unsigned int framebuffer;
+    unsigned int fboTexture;
 };
