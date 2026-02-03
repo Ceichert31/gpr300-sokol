@@ -15,12 +15,22 @@ struct Light{
   vec3 position;
 };
 
+struct Palette{
+  vec3 color1;
+  vec3 color2;
+};
+
 uniform vec3 camera;
+
 uniform Light light;
+
 uniform sampler2D main_texture;
 uniform sampler2D normal_map;
 uniform sampler2D gradient_texture;
+
 uniform bool normalMapOn;
+
+uniform Palette palette;
 
 vec3 toonshading(vec3 frag_pos, Light light) {
 
@@ -37,16 +47,20 @@ vec3 toonshading(vec3 frag_pos, Light light) {
   //Get dot between light and normal
   float angle = normalize(dot(normal, light.position));
 
+  //Direction from camera to fragment position
   vec3 view_dir = normalize(camera - frag_pos);
+
+  //Direction from fragment position to light position
   vec3 light_dir = normalize(light.position - frag_pos);
+
   vec3 reflect_dir = reflect(light_dir, normal);
+
   vec3 half_dir = normalize(light_dir + view_dir);
 
-  //Sample texture based on light angle with dot product
-
   //Calculate diffuse lighting (light diffusion w/ normal)
-  float diffuse = max(dot(normal, light_dir), 0);
+  float diffuse = (dot(normal, light_dir) + 1.0) * 0.5;
 
+  //Sample texture based on light angle with dot product
   vec3 gradientTex = texture(gradient_texture, vec2(diffuse)).xyz;
 
   //Calculate specular lighting
@@ -56,7 +70,10 @@ vec3 toonshading(vec3 frag_pos, Light light) {
   //Our uncolored lighting model
   //vec3 lighting = diffuse * material.diffuse + specular * material.specular + material.ambient;
 
-  return diffuse * gradientTex * light.color;
+  //Mix with color palette
+  vec3 light_color = mix(palette.color2, palette.color1, gradientTex);
+
+  return light_color;
 }
 
 void main()

@@ -38,6 +38,11 @@ Scene::Scene()
     };
 
     lightColor = light.color;
+
+    palette = {
+        .color1 = {1.0f, 0.0f, 1.0f},
+        .color2 = {0.0f, 0.0f, 1.0f}
+    };
 }
 
 Scene::~Scene()
@@ -69,6 +74,7 @@ void Scene::Render(void)
     glBindTextureUnit(0, mainTexture->getID());
     //Set normal texture
     glBindTextureUnit(1, normalTexture->getID());
+    //Set gradient toon texture
     glBindTextureUnit(2, gradientTexture->getID());
 
     toon->use();
@@ -91,6 +97,9 @@ void Scene::Render(void)
     toon->setVec3("material.diffuse", glm::vec3(1));
     toon->setVec3("material.specular", glm::vec3(1));
     toon->setVec3("material.ambient", backgroundColor * 0.1f);
+
+    toon->setVec3("palette.color1", palette.color1);
+    toon->setVec3("palette.color2", palette.color2);
 
     // draw suzanne
     suzanne->draw();
@@ -128,7 +137,10 @@ void Scene::Debug(void)
 
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
-    ImGui::ColorEdit3("Light Color", &lightColor.x);
+    ImGui::ColorEdit3("Light Color", &lightColor[0]);
+    ImGui::SeparatorText("Color Palette");
+    ImGui::ColorEdit3("Color 1", &palette.color1[0]);
+    ImGui::ColorEdit3("Color 2", &palette.color2[0]);
 
     ImGui::Checkbox("Paused", &time.paused);
     ImGui::SliderFloat("Time Factor", &time.factor, 0.0f, 10.0f);
