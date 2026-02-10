@@ -19,6 +19,7 @@ const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 struct{
     float alpha = 128.0f;
     bool isNormalMapOn = true;
+    float strength = 16.0f;
 } debug;
 
 struct FullScreenQuad   
@@ -81,7 +82,7 @@ Scene::Scene()
     //suzanneBP = std::make_unique<ew::Model>("assets/models/suzanne.obj")
 
     toon = std::make_unique<ew::Shader>("assets/shaders/WindWaker.vs", "assets/shaders/WindWaker.fs");
-    postShader = std::make_unique<ew::Shader>("assets/shaders/greyscale.vs", "assets/shaders/greyscale.fs");
+    postShader = std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/blur.fs");
    
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
@@ -211,6 +212,7 @@ void Scene::Render(void)
     //Render fullscreen quad
     postShader->use();
     postShader->setInt("screen", 0);
+    postShader->setFloat("strength", debug.strength);
 
     //Disable depth test
     glDisable(GL_DEPTH_TEST);
@@ -260,6 +262,7 @@ void Scene::Debug(void)
 
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
+    ImGui::SliderFloat("Blur Strength", &debug.strength, 0, 300);
     ImGui::ColorEdit3("Light Color", &lightColor[0]);
     ImGui::SeparatorText("Color Palette");
     ImGui::ColorEdit3("Color 1", &palette.color1[0]);
