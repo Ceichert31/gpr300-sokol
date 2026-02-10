@@ -29,6 +29,8 @@ class Scene final : public batteries::Scene
 
     std::unique_ptr<ew::Texture> gradientTexture;
 
+    std::unique_ptr<ew::Shader> postShader;
+
     batteries::light_t light;
 
     struct {
@@ -38,4 +40,5 @@ class Scene final : public batteries::Scene
 
     unsigned int framebuffer;
     unsigned int fboTexture;
+    unsigned int fboDepth;
 };
