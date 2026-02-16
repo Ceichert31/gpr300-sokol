@@ -33,13 +33,14 @@ const float kernel[9] = float[](
     1,1,1
 );
 
+//Used for blur
 const float cardinalKernel[9] = float[](
     1,2,1,
     2,4,2,
     1,2,1
 );
 
-
+//Used for edge detection
 const float edgeKernel[9] = float[](
     -1,-1,-1,
     -1,8,-1,
