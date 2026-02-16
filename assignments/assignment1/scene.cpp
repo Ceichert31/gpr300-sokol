@@ -83,7 +83,7 @@ Scene::Scene()
 
     toon = std::make_unique<ew::Shader>("assets/shaders/WindWaker.vs", "assets/shaders/WindWaker.fs");
     postShader = std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/blur.fs");
-   
+
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
     gradientTexture = std::make_unique<ew::Texture>("assets/textures/ZAtoon.png");

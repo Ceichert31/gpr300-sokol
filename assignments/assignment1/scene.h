@@ -23,7 +23,7 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Model> suzanne;
     std::unique_ptr<ew::Model> suzanneBP;
     std::unique_ptr<ew::Shader> toon;
-     std::unique_ptr<ew::Shader> blinnphong;
+     std::unique_ptr<ew::Shader> waterShader;
     std::unique_ptr<ew::Texture> mainTexture;
     std::unique_ptr<ew::Texture> normalTexture;
 
@@ -32,6 +32,13 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Shader> postShader;
 
     batteries::light_t light;
+
+    //Mipmaps
+    std::unique_ptr<ew::Texture> water128; //0
+    std::unique_ptr<ew::Texture> water64; //1
+    std::unique_ptr<ew::Texture> water32; //2
+    std::unique_ptr<ew::Texture> water16; //3
+    std::unique_ptr<ew::Texture> water8; //4
 
     struct {
       glm::vec3 color1;
