@@ -27,11 +27,11 @@ struct{
 
 Scene::Scene()
 {
-    waterShader = std::make_unique<ew::Shader>("assets/shaders/water.vs", "assets/shaders/water.fs");
+    waterShader = std::make_unique<ew::Shader>("assets/shaders/doubleDash.vs", "assets/shaders/doubleDash.fs");
 
-    water128 = std::make_unique<ew::Texture>("assets/textures/windwaker/water128.png");
-    water64 = std::make_unique<ew::Texture>("assets/textures/windwaker/water64.png");
-    water32 = std::make_unique<ew::Texture>("assets/textures/windwaker/water32.png");
+    waveTex = std::make_unique<ew::Texture>("assets/textures/doubledash/wave_tex.png");
+    waveSpec = std::make_unique<ew::Texture>("assets/textures/doubledash/wave_spec.png");
+    waveWarp = std::make_unique<ew::Texture>("assets/textures/doubledash/wave_warp.png");
     water16 = std::make_unique<ew::Texture>("assets/textures/windwaker/water16.png");
     water8 = std::make_unique<ew::Texture>("assets/textures/windwaker/water8.png");
 
@@ -63,15 +63,18 @@ void Scene::Render(void)
     glEnable(GL_DEPTH_TEST);
 
     //Set main texture
-    glBindTextureUnit(0, water128->getID());
+    glBindTextureUnit(0, waveTex->getID());
     //Set normal texture
-    glBindTextureUnit(1, water64->getID());
+    glBindTextureUnit(1, waveSpec->getID());
+    glBindTextureUnit(2, waveWarp->getID());
 
     //Set shader uniforms
     waterShader->use();
 
-    waterShader->setInt("main_texture", 0);
-    waterShader->setInt("secondary_texture", 1);
+    waterShader->setInt("tex", 0);
+    waterShader->setInt("spec", 1);
+    waterShader->setInt("warp", 2);
+    waterShader->setVec3("camera_position", camera.position);
     waterShader->setVec3("_waterColor", debug.waterColor);
     waterShader->setFloat("_deltaTime", (float)time.absolute);
     waterShader->setVec2("_floatSpeed", debug.scrollSpeed);

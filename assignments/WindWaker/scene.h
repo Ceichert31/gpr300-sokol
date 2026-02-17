@@ -24,9 +24,10 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Shader> waterShader;
 
         //Mipmaps
-    std::unique_ptr<ew::Texture> water128; //0
-    std::unique_ptr<ew::Texture> water64; //1
-    std::unique_ptr<ew::Texture> water32; //2
+    std::unique_ptr<ew::Texture> waveSpec; //0
+    std::unique_ptr<ew::Texture> waveTex; //1
+    std::unique_ptr<ew::Texture> waveWarp; //2
+    
     std::unique_ptr<ew::Texture> water16; //3
     std::unique_ptr<ew::Texture> water8; //4
 
