@@ -12,6 +12,8 @@ const float offset = 1.0 / 300.0;
 
 uniform float strength;
 
+#define boxblur mat3(1,1,1,1,1,1,1,1,1) * 0.111
+
 const vec2 offsets[9] = vec2[] 
 (
     vec2(-offset,offset), //top-left
@@ -54,7 +56,7 @@ void main()
     for (int i = 0; i < 9; i++)
     {
         vec3 local = vec3(texture(screen, vs_texcoord + offsets[i]));
-        color += local * edgeKernel[i] / strength;
+        color += local * kernel[i] * 0.1111 * strength;
     }
 
   FragColor = vec4(color, 1.0);
