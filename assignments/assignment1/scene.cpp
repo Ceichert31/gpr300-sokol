@@ -27,7 +27,9 @@ const char* postNames[] = {
     "UVNoise",
     "PixelFilter",
     "Vignette",
-    "Film Grain"
+    "Film Grain",
+    "Sharpen",
+    "GaussianBlur"
 };
 
 struct{
@@ -100,9 +102,9 @@ Scene::Scene()
     blinnPhong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/fullscreen.fs"));
     //Blur
-    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/blur.fs"));
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/BoxBlur.fs"));
     //Outline
-    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/outline.fs"));
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/EdgeDetection.fs"));
     //UV noise
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/UVNoise.fs"));
     //Pixel Filter
@@ -111,6 +113,10 @@ Scene::Scene()
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/Vignette.fs"));
     //Film grain
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/FilmGrain.fs"));
+    //Sharpen
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/Sharpen.fs"));
+    //Gaussian Blur
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/GaussianBlur.fs"));
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
@@ -214,14 +220,20 @@ void Scene::PostProcess(ew::Shader* shader)
         case Vignette:
             shader->setFloat("strength", debug.strength / 100);
             shader->setFloat("resolution", debug.resolution);
-            shader->setInt("noise", 2);
         break;
 
         case FilmGrain:
             shader->setFloat("strength", debug.strength / 100);
             shader->setFloat("resolution", debug.resolution);
-            shader->setInt("noise", 2);
             shader->setFloat("time", time.absolute);
+        break;
+
+        case Sharpen:
+            shader->setFloat("strength", debug.strength / 1000);
+        break;
+
+        case GaussianBlur:
+            shader->setFloat("strength", debug.strength / 1000);
         break;
     }
 

@@ -7,12 +7,9 @@ out vec4 FragColor;
 in vec2 vs_texcoord;
 
 uniform sampler2D screen;
-//uniform float offset;
-const float offset = 1.0 / 300.0;
+const float offset = 1.0 / 150.0;
 
 uniform float strength;
-
-#define boxblur mat3(1,1,1,1,1,1,1,1,1) * 0.111
 
 const vec2 offsets[9] = vec2[] 
 (

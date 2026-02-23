@@ -7,12 +7,9 @@ out vec4 FragColor;
 in vec2 vs_texcoord;
 
 uniform sampler2D screen;
-//uniform float offset;
-const float offset = 1.0 / 300.0;
-
 uniform float strength;
 
-#define boxblur mat3(1,1,1,1,1,1,1,1,1) * 0.111
+const float offset = 1.0 / 300.0;
 
 const vec2 offsets[9] = vec2[] 
 (
@@ -29,28 +26,20 @@ const vec2 offsets[9] = vec2[]
     vec2(offset, -offset) //bottom-right
 );
 
-const float kernel[9] = float[](
-    1,1,1,
-    1,1,1,
-    1,1,1
-);
-
-//Used for blur
-const float cardinalKernel[9] = float[](
-    1,2,1,
-    2,4,2,
-    1,2,1
+float kernel[9] = float[](
+    0, -1,  0,
+   -1,  5, -1,
+    0, -1,  0
 );
 
 void main()
 {
-  vec3 color = vec3(0);
-
-    for (int i = 0; i < 9; i++)
-    {
-        vec3 local = vec3(texture(screen, vs_texcoord + offsets[i]));
-        color += local * cardinalKernel[i] / strength;
-    }
-
+  vec3 color = texture(screen, vs_texcoord).xyz;
+  
+  for (int i = 0; i < 9; i++)
+  {
+      vec3 local = vec3(texture(screen, vs_texcoord + offsets[i]));
+      color += local * (kernel[i]) / strength;
+  }
   FragColor = vec4(color, 1.0);
 }
