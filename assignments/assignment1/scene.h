@@ -9,12 +9,6 @@
 #include "ew/shader.h"
 #include "ew/texture.h"
 
-enum Effects {
-  DisableEffect,
-  BoxBlur,
-  Outline
-};
-
 class Scene final : public batteries::Scene
 {
   public:
@@ -22,6 +16,7 @@ class Scene final : public batteries::Scene
     virtual ~Scene();
 
     void Update(float dt);
+    void PostProcess(ew::Shader* shader);
     void Render(void);
     void Debug(void);
 
@@ -29,27 +24,22 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Model> suzanne;
     std::unique_ptr<ew::Model> suzanneBP;
     std::unique_ptr<ew::Shader> toon;
-     std::unique_ptr<ew::Shader> waterShader;
+     std::unique_ptr<ew::Shader> blinnPhong;
     std::unique_ptr<ew::Texture> mainTexture;
     std::unique_ptr<ew::Texture> normalTexture;
 
-    std::unique_ptr<ew::Texture> gradientTexture;
-
-    std::unique_ptr<ew::Shader> postShader;
-
     batteries::light_t light;
-
-    //Mipmaps
-    std::unique_ptr<ew::Texture> water128; //0
-    std::unique_ptr<ew::Texture> water64; //1
-    std::unique_ptr<ew::Texture> water32; //2
-    std::unique_ptr<ew::Texture> water16; //3
-    std::unique_ptr<ew::Texture> water8; //4
 
     struct {
       glm::vec3 color1;
       glm::vec3 color2;
     } palette;
+
+    enum Effects {
+      DisableEffect,
+      BoxBlur,
+      Outline
+    };
 
     unsigned int framebuffer;
     unsigned int fboTexture;

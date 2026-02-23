@@ -90,12 +90,10 @@ struct FullScreenQuad
 Scene::Scene()
 {
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
-    //suzanneBP = std::make_unique<ew::Model>("assets/models/suzanne.obj")
-
-    toon = std::make_unique<ew::Shader>("assets/shaders/WindWaker.vs", "assets/shaders/WindWaker.fs");
 
     //Blinn phong
-    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs"));
+    blinnPhong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/fullscreen.fs"));
     //Blur
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/blur.fs"));
     //Outline
@@ -103,7 +101,6 @@ Scene::Scene()
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
-    gradientTexture = std::make_unique<ew::Texture>("assets/textures/ZAtoon.png");
 
     light = {
         .brightness = 1.0f,
@@ -173,68 +170,20 @@ void Scene::Update(float dt)
 
 auto objectMatrix = glm::mat4(1.0f);
 
-void PostProcess(ew::Shader* shader)
+void Scene::PostProcess(ew::Shader* shader)
 {
     shader->use();
     shader->setInt("screen", 0);
-    shader->setFloat("strength", debug.strength);
-}
 
-void Scene::Render(void)
-{
-    const auto view_proj = camera.Projection() * camera.View();
+    switch (debug.postIndex){
+        case BoxBlur:
+            shader->setFloat("strength", debug.strength);
+        break;
 
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    //Re-enable depth test
-    glEnable(GL_DEPTH_TEST);
-  
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    {
-        glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //Set main texture
-        glBindTextureUnit(0, mainTexture->getID());
-        //Set normal texture
-        glBindTextureUnit(1, normalTexture->getID());
-        //Set gradient toon texture
-        glBindTextureUnit(2, gradientTexture->getID());
-
-
-        toon->use();
-
-        // scene matrices
-
-        toon->setInt("main_texture", 0);
-        toon->setInt("normal_map", 1);
-        toon->setInt("gradient_texture", 2);
-
-        toon->setMat4("model", objectMatrix);
-        toon->setMat4("view_proj", view_proj);
-        toon->setVec3("camera", camera.position);
-
-        toon->setVec3("light.position", light.position);
-        toon->setVec3("light.color", light.color);
-        toon->setFloat("material.shininess", debug.alpha);
-        toon->setInt("normalMapOn", debug.isNormalMapOn);
-
-        toon->setVec3("material.diffuse", glm::vec3(1));
-        toon->setVec3("material.specular", glm::vec3(1));
-        toon->setVec3("material.ambient", backgroundColor * 0.1f);
-
-        toon->setVec3("palette.color1", palette.color1);
-        toon->setVec3("palette.color2", palette.color2);
-
-        // draw suzanne
-        suzanne->draw();
+        case Outline:
+            shader->setFloat("strength", debug.strength);
+        break;
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //Render fullscreen quad
-    PostProcess(postEffects[debug.postIndex].get());
 
     //Disable depth test
     glDisable(GL_DEPTH_TEST);
@@ -250,6 +199,53 @@ void Scene::Render(void)
 
     //Draw triangles from first array all the way to 6
     glDrawArrays(GL_TRIANGLES, 0, fullscreenQuad.verticesNumber);
+}
+
+void Scene::Render(void)
+{
+    const auto view_proj = camera.Projection() * camera.View();
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    //Re-enable depth test
+    glEnable(GL_DEPTH_TEST);
+  
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    {
+        glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //Set main texture
+        glBindTextureUnit(0, mainTexture->getID());
+        //Set normal texture
+        glBindTextureUnit(1, normalTexture->getID());
+
+        
+        blinnPhong->use();
+        blinnPhong->setInt("main_texture", 0);
+        blinnPhong->setInt("normal_map", 1);
+
+        blinnPhong->setMat4("model", objectMatrix);
+        blinnPhong->setMat4("view_proj", view_proj);
+        blinnPhong->setVec3("camera", camera.position);
+
+        blinnPhong->setVec3("light.position", light.position);
+        blinnPhong->setVec3("light.color", light.color);
+        blinnPhong->setFloat("material.shininess", debug.alpha);
+        blinnPhong->setInt("normalMapOn", debug.isNormalMapOn);
+
+        blinnPhong->setVec3("material.diffuse", glm::vec3(1));
+        blinnPhong->setVec3("material.specular", glm::vec3(1));
+        blinnPhong->setVec3("material.ambient", backgroundColor * 0.1f);
+
+        suzanne->draw();
+    }
+
+    //Clear framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //Render fullscreen quad
+    PostProcess(postEffects[debug.postIndex].get());
 }
 
 void Scene::Debug(void)
