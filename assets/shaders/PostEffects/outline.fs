@@ -29,17 +29,11 @@ const vec2 offsets[9] = vec2[]
     vec2(offset, -offset) //bottom-right
 );
 
-const float kernel[9] = float[](
-    1,1,1,
-    1,1,1,
-    1,1,1
-);
-
-//Used for blur
-const float cardinalKernel[9] = float[](
-    1,2,1,
-    2,4,2,
-    1,2,1
+//Used for edge detection
+const float edgeKernel[9] = float[](
+    -1,-1,-1,
+    -1,8,-1,
+    -1,-1,-1
 );
 
 void main()
@@ -49,7 +43,7 @@ void main()
     for (int i = 0; i < 9; i++)
     {
         vec3 local = vec3(texture(screen, vs_texcoord + offsets[i]));
-        color += local * cardinalKernel[i] * strength;
+        color += local * edgeKernel[i] * strength;
     }
 
   FragColor = vec4(color, 1.0);

@@ -9,6 +9,12 @@
 #include "ew/shader.h"
 #include "ew/texture.h"
 
+enum Effects {
+  DisableEffect,
+  BoxBlur,
+  Outline
+};
+
 class Scene final : public batteries::Scene
 {
   public:

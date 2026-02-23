@@ -11,15 +11,26 @@
 // batteries
 #include "batteries/opengl.h"
 
+#include <vector>
+
 glm::mat4 lightMatrix = glm::mat4(1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f);
 
 const glm::vec4 backgroundColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
+std::vector<std::unique_ptr<ew::Shader>> postEffects;
+
+const char* postNames[] = {
+    "None",
+    "BoxBlur",
+    "Outline"
+};
+
 struct{
     float alpha = 128.0f;
     bool isNormalMapOn = true;
     float strength = 16.0f;
+    int postIndex = 0;
 } debug;
 
 struct FullScreenQuad   
@@ -82,7 +93,13 @@ Scene::Scene()
     //suzanneBP = std::make_unique<ew::Model>("assets/models/suzanne.obj")
 
     toon = std::make_unique<ew::Shader>("assets/shaders/WindWaker.vs", "assets/shaders/WindWaker.fs");
-    postShader = std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/blur.fs");
+
+    //Blinn phong
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs"));
+    //Blur
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/blur.fs"));
+    //Outline
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/outline.fs"));
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
@@ -156,6 +173,13 @@ void Scene::Update(float dt)
 
 auto objectMatrix = glm::mat4(1.0f);
 
+void PostProcess(ew::Shader* shader)
+{
+    shader->use();
+    shader->setInt("screen", 0);
+    shader->setFloat("strength", debug.strength);
+}
+
 void Scene::Render(void)
 {
     const auto view_proj = camera.Projection() * camera.View();
@@ -210,9 +234,7 @@ void Scene::Render(void)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //Render fullscreen quad
-    postShader->use();
-    postShader->setInt("screen", 0);
-    postShader->setFloat("strength", debug.strength);
+    PostProcess(postEffects[debug.postIndex].get());
 
     //Disable depth test
     glDisable(GL_DEPTH_TEST);
@@ -260,6 +282,8 @@ void Scene::Debug(void)
 
     ImGui::Begin("Controlls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
+    ImGui::Combo("Post Processing Effect", &debug.postIndex, postNames, IM_ARRAYSIZE(postNames));
+
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
     ImGui::SliderFloat("Blur Strength", &debug.strength, 0, 300);
@@ -269,7 +293,7 @@ void Scene::Debug(void)
     ImGui::ColorEdit3("Color 2", &palette.color2[0]);
 
     ImGui::Image((void*)(intptr_t)fboTexture, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
-       ImGui::Image((void*)(intptr_t)fboDepth, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
+    ImGui::Image((void*)(intptr_t)fboDepth, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
 
     ImGui::Checkbox("Paused", &time.paused);
     ImGui::SliderFloat("Time Factor", &time.factor, 0.0f, 10.0f);
