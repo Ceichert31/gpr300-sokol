@@ -293,8 +293,8 @@ void Scene::Debug(void)
 
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
-    ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 100);
-    ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 100);
+    ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 1000);
+    ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 1000);
     ImGui::ColorEdit3("Light Color", &lightColor[0]);
     ImGui::SeparatorText("Color Palette");
     ImGui::ColorEdit3("Color 1", &palette.color1[0]);
