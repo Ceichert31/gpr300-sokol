@@ -42,7 +42,8 @@ class Scene final : public batteries::Scene
       Outline,
       UVNoise,
       PixelFilter,
-      Vignette
+      Vignette,
+      FilmGrain
     };
 
     unsigned int framebuffer;

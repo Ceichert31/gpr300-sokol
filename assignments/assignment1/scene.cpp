@@ -26,7 +26,8 @@ const char* postNames[] = {
     "Outline",
     "UVNoise",
     "PixelFilter",
-    "Vignette"
+    "Vignette",
+    "Film Grain"
 };
 
 struct{
@@ -108,6 +109,8 @@ Scene::Scene()
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/PixelFilter.fs"));
     //Vignette
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/Vignette.fs"));
+    //Film grain
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/FilmGrain.fs"));
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
@@ -175,7 +178,6 @@ Scene::~Scene()
 void Scene::Update(float dt)
 {
     batteries::Scene::Update(dt);
-
     /* body */
 }
 
@@ -213,6 +215,13 @@ void Scene::PostProcess(ew::Shader* shader)
             shader->setFloat("strength", debug.strength / 100);
             shader->setFloat("resolution", debug.resolution);
             shader->setInt("noise", 2);
+        break;
+
+        case FilmGrain:
+            shader->setFloat("strength", debug.strength / 100);
+            shader->setFloat("resolution", debug.resolution);
+            shader->setInt("noise", 2);
+            shader->setFloat("time", time.absolute);
         break;
     }
 
