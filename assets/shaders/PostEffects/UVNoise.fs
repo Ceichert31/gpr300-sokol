@@ -14,7 +14,7 @@ uniform float resolution;
 
 void main()
 {
-  vec3 noisyTexture = texture(noise, vs_texcoord * resolution).xyz * 0.01 * strength / 100;
+  vec3 noisyTexture = texture(noise, vs_texcoord * resolution).xyz * 0.01 * strength;
   vec2 noisyUV = vec2(vs_texcoord.x + noisyTexture.x, vs_texcoord.y + noisyTexture.y);
   vec3 color = texture(screen, noisyUV).xyz;
 

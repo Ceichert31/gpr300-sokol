@@ -16,7 +16,7 @@ uniform vec2 screenResolution;
 void main()
 {
   //Calculate subdivisions
-  vec2 subdivision = screenResolution / vec2(strength / 100);
+  vec2 subdivision = screenResolution / vec2(strength);
 
   vec2 pixelUV = subdivision * vs_texcoord;
 

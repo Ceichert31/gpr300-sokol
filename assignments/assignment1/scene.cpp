@@ -25,7 +25,8 @@ const char* postNames[] = {
     "BoxBlur",
     "Outline",
     "UVNoise",
-    "PixelFilter"
+    "PixelFilter",
+    "Vignette"
 };
 
 struct{
@@ -105,6 +106,8 @@ Scene::Scene()
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/UVNoise.fs"));
     //Pixel Filter
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/PixelFilter.fs"));
+    //Vignette
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/Vignette.fs"));
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
@@ -188,7 +191,7 @@ void Scene::PostProcess(ew::Shader* shader)
 
     switch (debug.postIndex){
         case BoxBlur:
-            shader->setFloat("strength", debug.strength);
+            shader->setFloat("strength", debug.strength / 10);
         break;
 
         case Outline:
@@ -196,14 +199,20 @@ void Scene::PostProcess(ew::Shader* shader)
         break;
 
         case UVNoise:
-            shader->setFloat("strength", debug.strength);
+            shader->setFloat("strength", debug.strength / 100);
             shader->setFloat("resolution", debug.resolution);
             shader->setInt("noise", 2);
         break;
 
         case PixelFilter:
-            shader->setFloat("strength", debug.strength);
+            shader->setFloat("strength", debug.strength / 100);
             shader->setVec2("screenResolution", glm::vec2(sapp_width(), sapp_height()));
+        break;
+
+        case Vignette:
+            shader->setFloat("strength", debug.strength / 100);
+            shader->setFloat("resolution", debug.resolution);
+            shader->setInt("noise", 2);
         break;
     }
 
