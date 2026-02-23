@@ -24,7 +24,8 @@ const char* postNames[] = {
     "None",
     "BoxBlur",
     "Outline",
-    "UVNoise"
+    "UVNoise",
+    "PixelFilter"
 };
 
 struct{
@@ -102,6 +103,8 @@ Scene::Scene()
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/outline.fs"));
     //UV noise
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/UVNoise.fs"));
+    //Pixel Filter
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/PixelFilter.fs"));
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
@@ -196,6 +199,11 @@ void Scene::PostProcess(ew::Shader* shader)
             shader->setFloat("strength", debug.strength);
             shader->setFloat("resolution", debug.resolution);
             shader->setInt("noise", 2);
+        break;
+
+        case PixelFilter:
+            shader->setFloat("strength", debug.strength);
+            shader->setVec2("screenResolution", glm::vec2(sapp_width(), sapp_height()));
         break;
     }
 

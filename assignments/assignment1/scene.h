@@ -40,7 +40,8 @@ class Scene final : public batteries::Scene
       DisableEffect,
       BoxBlur,
       Outline,
-      UVNoise
+      UVNoise,
+      PixelFilter
     };
 
     unsigned int framebuffer;
