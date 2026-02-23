@@ -27,6 +27,7 @@ class Scene final : public batteries::Scene
      std::unique_ptr<ew::Shader> blinnPhong;
     std::unique_ptr<ew::Texture> mainTexture;
     std::unique_ptr<ew::Texture> normalTexture;
+    std::unique_ptr<ew::Texture> noiseTexture;
 
     batteries::light_t light;
 
@@ -38,7 +39,8 @@ class Scene final : public batteries::Scene
     enum Effects {
       DisableEffect,
       BoxBlur,
-      Outline
+      Outline,
+      UVNoise
     };
 
     unsigned int framebuffer;

@@ -23,13 +23,15 @@ std::vector<std::unique_ptr<ew::Shader>> postEffects;
 const char* postNames[] = {
     "None",
     "BoxBlur",
-    "Outline"
+    "Outline",
+    "UVNoise"
 };
 
 struct{
     float alpha = 128.0f;
     bool isNormalMapOn = true;
     float strength = 16.0f;
+    float resolution = 1.0f;
     int postIndex = 0;
 } debug;
 
@@ -98,9 +100,12 @@ Scene::Scene()
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/blur.fs"));
     //Outline
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/outline.fs"));
+    //UV noise
+    postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/UVNoise.fs"));
 
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
+    noiseTexture = std::make_unique<ew::Texture>("assets/textures/Noise.png");
 
     light = {
         .brightness = 1.0f,
@@ -175,6 +180,9 @@ void Scene::PostProcess(ew::Shader* shader)
     shader->use();
     shader->setInt("screen", 0);
 
+    //Set normal texture
+    glBindTextureUnit(2, noiseTexture->getID());
+
     switch (debug.postIndex){
         case BoxBlur:
             shader->setFloat("strength", debug.strength);
@@ -182,6 +190,12 @@ void Scene::PostProcess(ew::Shader* shader)
 
         case Outline:
             shader->setFloat("strength", debug.strength);
+        break;
+
+        case UVNoise:
+            shader->setFloat("strength", debug.strength);
+            shader->setFloat("resolution", debug.resolution);
+            shader->setInt("noise", 2);
         break;
     }
 
@@ -220,7 +234,6 @@ void Scene::Render(void)
         //Set normal texture
         glBindTextureUnit(1, normalTexture->getID());
 
-        
         blinnPhong->use();
         blinnPhong->setInt("main_texture", 0);
         blinnPhong->setInt("normal_map", 1);
@@ -257,8 +270,6 @@ void Scene::Debug(void)
     glm::mat4 m{1.0f};
     auto *view = glm::value_ptr(camera.View());
     auto *proj = glm::value_ptr(camera.Projection());
-    
-    //ImGuizmo::DrawGrid(view, proj, glm::value_ptr(m), 100.0f);
 
     light.color = lightColor;
 
@@ -276,13 +287,14 @@ void Scene::Debug(void)
 
     cameracontroller.Debug();
 
-    ImGui::Begin("Controlls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
     ImGui::Combo("Post Processing Effect", &debug.postIndex, postNames, IM_ARRAYSIZE(postNames));
 
     ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
-    ImGui::SliderFloat("Blur Strength", &debug.strength, 0, 300);
+    ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 100);
+    ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 100);
     ImGui::ColorEdit3("Light Color", &lightColor[0]);
     ImGui::SeparatorText("Color Palette");
     ImGui::ColorEdit3("Color 1", &palette.color1[0]);
