@@ -10,9 +10,6 @@ uniform mat4 model;
 
 // varyings
 out vec3 vs_position;
-out vec3 vs_normal;
-out vec2 vs_texcoord;
-out mat3 vs_tangent_space;
 
 void main()
 {

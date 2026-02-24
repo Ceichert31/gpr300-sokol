@@ -185,25 +185,23 @@ void Scene::SetupShadowBuffer()
         glBindTexture(GL_TEXTURE_2D, fboShadowDepth);
 
         //Create a texture with one channel, the depth component
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 800, 600, 0, GL_DEPTH, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 800, 600, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, NULL);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_COMPONENT, GL_TEXTURE_2D, fboShadowDepth, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fboShadowDepth, 0);
 
         glDrawBuffers(0, nullptr);
         glReadBuffer(GL_NONE);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fboDepth, 0);
 
         //Cleanup textures
         glBindTexture(GL_TEXTURE_2D, 0);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
-            printf("Warning! Frame buffer is not complete!\n");
+            printf("Warning! Shadow buffer is not complete!\n");
         }
 
         //Cleanup buffer binding
@@ -381,7 +379,8 @@ void Scene::Render(void)
     }
 
     //Render shadow map (scene from light view)
-    glBindFramebuffer(GL_FRAMEBUFFER, fboShadow){
+    glBindFramebuffer(GL_FRAMEBUFFER, fboShadow);
+    {
         const auto view_proj = camera.Projection() * camera.View();
 
         //Setup conditions for all scopes
