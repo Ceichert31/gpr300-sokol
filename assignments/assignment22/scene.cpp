@@ -371,7 +371,7 @@ void Scene::Render(void)
         blinnPhong->setMat4("model", objectMatrix);
         blinnPhong->setMat4("view_proj", view_proj);
         blinnPhong->setVec3("camera", camera.position);
-        //blinnPhong->setMat4("light_view_proj", light_view_proj);
+   
 
         blinnPhong->setVec3("light.position", light.position);
         blinnPhong->setVec3("light.color", light.color);
@@ -410,6 +410,8 @@ void Scene::Render(void)
 
         //Just clear depth buffer
         glClear(GL_DEPTH_BUFFER_BIT);
+
+        blinnPhong->setMat4("light_view_proj", light_view_proj);
 
         depthShader->use();
         depthShader->setMat4("model", objectMatrix);

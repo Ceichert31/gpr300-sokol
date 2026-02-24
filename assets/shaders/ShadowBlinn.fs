@@ -83,5 +83,7 @@ void main()
 
   float shadow = ShadowCalculation(vs_light_proj_pos);
 
+  lighting *= (1.0 - shadow);
+
   FragColor = vec4(lighting, 1.0) * texture(main_texture, vs_texcoord);
 }
