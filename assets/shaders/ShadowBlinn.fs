@@ -9,7 +9,7 @@ in vec3 vs_position;
 in vec3 vs_normal;
 in vec2 vs_texcoord;
 in mat3 vs_tangent_space;
-in vec4 light_proj_post;
+in vec4 vs_light_proj_pos;
 
 struct Light{
   vec3 color;
@@ -31,6 +31,18 @@ uniform sampler2D normal_map;
 uniform bool normalMapOn;
 
 uniform sampler2D shadow_map;
+
+float ShadowCalculation(vec4 fragPositionLightSpace){
+  
+  //Perspective division
+  vec3 proj_coords = fragPositionLightSpace.xyz / fragPositionLightSpace.w;
+
+  float closest = texture(shadow_map, proj_coords.xy).x;
+  float current = proj_coords.z;
+
+  float shadow = 1.0;
+  return shadow;
+}
 
 vec3 blinnphong(vec3 frag_pos, Light light) {
 
@@ -68,5 +80,8 @@ vec3 blinnphong(vec3 frag_pos, Light light) {
 void main()
 {
   vec3 lighting = blinnphong(vs_position, light);
+
+  float shadow = ShadowCalculation(vs_light_proj_pos);
+
   FragColor = vec4(lighting, 1.0) * texture(main_texture, vs_texcoord);
 }

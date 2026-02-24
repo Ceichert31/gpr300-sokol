@@ -34,6 +34,8 @@ class Scene final : public batteries::Scene
 
     batteries::light_t light;
 
+    ew::Mesh plane;
+
     struct {
       glm::vec3 color1;
       glm::vec3 color2;

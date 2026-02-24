@@ -10,6 +10,7 @@
 
 // batteries
 #include "batteries/opengl.h"
+#include "ew/procGen.h"
 
 #include <vector>
 
@@ -214,7 +215,7 @@ Scene::Scene()
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
 
     //Blinn phong
-    blinnPhong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
+    blinnPhong = std::make_unique<ew::Shader>("assets/shaders/ShadowBlinn.vs", "assets/shaders/ShadowBlinn.fs");
 
     depthShader = std::make_unique<ew::Shader>("assets/shaders/shadowDepth.vs", "assets/shaders/shadowDepth.fs");
 
@@ -258,6 +259,8 @@ Scene::Scene()
 
     SetupFrameBuffer();
     SetupShadowBuffer();
+
+    plane.load(ew::createPlane(100, 100, 1));
 }
 
 Scene::~Scene()
@@ -358,13 +361,17 @@ void Scene::Render(void)
         //Set normal texture
         glBindTextureUnit(1, normalTexture->getID());
 
+        glBindTextureUnit(2, fboShadowDepth);
+
         blinnPhong->use();
         blinnPhong->setInt("main_texture", 0);
         blinnPhong->setInt("normal_map", 1);
+        blinnPhong->setInt("shadow_map", 2);
 
         blinnPhong->setMat4("model", objectMatrix);
         blinnPhong->setMat4("view_proj", view_proj);
         blinnPhong->setVec3("camera", camera.position);
+        //blinnPhong->setMat4("light_view_proj", light_view_proj);
 
         blinnPhong->setVec3("light.position", light.position);
         blinnPhong->setVec3("light.color", light.color);
@@ -376,6 +383,10 @@ void Scene::Render(void)
         blinnPhong->setVec3("material.ambient", backgroundColor * 0.1f);
 
         suzanne->draw();
+
+        const auto planeMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f));
+        blinnPhong->setMat4("model", planeMatrix);
+        plane.draw();
     }
 
     //Render shadow map (scene from light view)
@@ -405,7 +416,6 @@ void Scene::Render(void)
         depthShader->setMat4("light_view_proj", light_view_proj);
 
         suzanne->draw();
-
     }
 
     //Clear framebuffer
