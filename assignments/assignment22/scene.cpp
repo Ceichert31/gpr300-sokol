@@ -381,7 +381,12 @@ void Scene::Render(void)
     //Render shadow map (scene from light view)
     glBindFramebuffer(GL_FRAMEBUFFER, fboShadow);
     {
-        const auto view_proj = camera.Projection() * camera.View();
+       
+        const auto light_proj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.03f, 100.0f);
+
+        const auto light_view = glm::lookAt(light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        const auto light_view_proj = light_proj * light_view;
 
         //Setup conditions for all scopes
         glEnable(GL_CULL_FACE);
@@ -397,7 +402,7 @@ void Scene::Render(void)
 
         depthShader->use();
         depthShader->setMat4("model", objectMatrix);
-        depthShader->setMat4("light_view_proj", view_proj);
+        depthShader->setMat4("light_view_proj", light_view_proj);
 
         suzanne->draw();
 
