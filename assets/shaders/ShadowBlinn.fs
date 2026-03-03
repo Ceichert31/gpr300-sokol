@@ -34,7 +34,7 @@ uniform sampler2D shadow_map;
 
 uniform float bias;
 
-float ShadowCalculation(vec4 fragPositionLightSpace){
+float ShadowCalculation(vec4 fragPositionLightSpace) {
   
   //Perspective division
   vec3 proj_coords = fragPositionLightSpace.xyz / fragPositionLightSpace.w;
@@ -88,7 +88,10 @@ void main()
 
   float shadow = ShadowCalculation(vs_light_proj_pos);
 
+  vec3 test = texture(shadow_map, vs_texcoord).xyz;
+
   lighting *= (1.0 - shadow);
 
   FragColor = vec4(lighting, 1.0) * texture(main_texture, vs_texcoord);
+  //FragColor = vec4(test, 1.0);
 }

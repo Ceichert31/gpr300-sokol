@@ -1,4 +1,4 @@
-#version 300 es
+#version 410
 
 // attributes
 layout(location = 0) in vec3 in_position;
@@ -9,7 +9,7 @@ layout(location = 3) in vec3 in_tangent;
 // uniforms
 uniform mat4 view_proj;
 uniform mat4 model;
-uniform vec4 light_view_proj;
+uniform mat4 light_view_proj;
 
 // varyings
 out vec3 vs_position;

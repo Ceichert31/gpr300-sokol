@@ -12,8 +12,8 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
-const int SHADOW_WIDTH = 1024;
-const int SHADOW_HEIGHT = 1024;
+const int SHADOW_WIDTH = 800;
+const int SHADOW_HEIGHT = 600;
 
 class Scene final : public batteries::Scene
 {

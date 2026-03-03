@@ -96,6 +96,9 @@ struct FullScreenQuad
     }
 } fullscreenQuad;
 
+const auto planeMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f));
+
+#pragma region Deprecated
 
 // struct ShadowBuffer{
 //     GLuint fbo;
@@ -136,6 +139,10 @@ struct FullScreenQuad
 //         }
 //     }
 // } shadowBuffer;
+
+#pragma endregion
+
+#pragma region Buffer Creation
 
 void Scene::SetupFrameBuffer(){
   //Allocate frame buffer
@@ -210,6 +217,8 @@ void Scene::SetupShadowBuffer()
         glBindBuffer(GL_FRAMEBUFFER, 0);
     }
 }
+
+#pragma endregion
 
 Scene::Scene()
 {
@@ -303,8 +312,7 @@ void Scene::PostProcess(ew::Shader* shader)
 
         case PixelFilter:
             shader->setFloat("strength", debug.strength / 100);
-            shader->setVec2("screenResolution", glm::vec2(sapp_width(), sapp_height()));
-        break;
+            shader->setVec2("screenResolution", glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT));
 
         case Vignette:
             shader->setFloat("strength", debug.strength / 100);
@@ -346,7 +354,7 @@ void Scene::Render(void)
 {
     const auto view_proj = camera.Projection() * camera.View();
 
-    const auto light_proj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.03f, 1000.0f);
+    const auto light_proj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.03f, 100.0f);
 
     const auto light_view = glm::lookAt(light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -379,8 +387,10 @@ void Scene::Render(void)
         blinnPhong->setMat4("model", objectMatrix);
         blinnPhong->setMat4("view_proj", view_proj);
         blinnPhong->setVec3("camera", camera.position);
-   
+
         blinnPhong->setMat4("light_view_proj", light_view_proj);
+        blinnPhong->setFloat("bias", debug.bias);
+
         blinnPhong->setVec3("light.position", light.position);
         blinnPhong->setVec3("light.color", light.color);
         blinnPhong->setFloat("material.shininess", debug.alpha);
@@ -389,11 +399,8 @@ void Scene::Render(void)
         blinnPhong->setVec3("material.diffuse", glm::vec3(1));
         blinnPhong->setVec3("material.specular", glm::vec3(1));
         blinnPhong->setVec3("material.ambient", backgroundColor * 0.1f);
-        blinnPhong->setFloat("bias", debug.bias);
 
         suzanne->draw();
-
-        const auto planeMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f));
         blinnPhong->setMat4("model", planeMatrix);
         plane.draw();
     }
@@ -403,7 +410,7 @@ void Scene::Render(void)
     {
         //Setup conditions for all scopes
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glCullFace(GL_FRONT);
 
         //Re-enable depth test
         glEnable(GL_DEPTH_TEST);
@@ -416,6 +423,8 @@ void Scene::Render(void)
         depthShader->use();
         depthShader->setMat4("model", objectMatrix);
         depthShader->setMat4("light_view_proj", light_view_proj);
+
+        glCullFace(GL_BACK);
 
         suzanne->draw();
     }
@@ -461,7 +470,7 @@ void Scene::Debug(void)
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
     ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 1000);
     ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 1000);
-    ImGui::SliderFloat("Shadow Bias", &debug.bias, 0, 0.01);
+    ImGui::SliderFloat("Shadow Bias", &debug.bias, 0, 0.05);
     ImGui::ColorEdit3("Light Color", &lightColor[0]);
     ImGui::SeparatorText("Color Palette");
     ImGui::ColorEdit3("Color 1", &palette.color1[0]);
