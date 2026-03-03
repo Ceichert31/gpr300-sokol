@@ -39,6 +39,7 @@ struct{
     float strength = 16.0f;
     float resolution = 1.0f;
     int postIndex = 0;
+    float bias = 0.005;
 } debug;
 
 struct FullScreenQuad   
@@ -147,7 +148,7 @@ void Scene::SetupFrameBuffer(){
         glBindTexture(GL_TEXTURE_2D, fboTexture);
 
         //Create 800/600 render texture with 8 unsigned bytes
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -157,7 +158,7 @@ void Scene::SetupFrameBuffer(){
         glGenTextures(1, &fboDepth);
         glBindTexture(GL_TEXTURE_2D, fboDepth);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 800, 600, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);  
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);  
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -186,7 +187,7 @@ void Scene::SetupShadowBuffer()
         glBindTexture(GL_TEXTURE_2D, fboShadowDepth);
 
         //Create a texture with one channel, the depth component
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 800, 600, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, NULL);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -344,6 +345,13 @@ void Scene::PostProcess(ew::Shader* shader)
 void Scene::Render(void)
 {
     const auto view_proj = camera.Projection() * camera.View();
+
+    const auto light_proj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.03f, 1000.0f);
+
+    const auto light_view = glm::lookAt(light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    const auto light_view_proj = light_proj * light_view;
+
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
@@ -372,7 +380,7 @@ void Scene::Render(void)
         blinnPhong->setMat4("view_proj", view_proj);
         blinnPhong->setVec3("camera", camera.position);
    
-
+        blinnPhong->setMat4("light_view_proj", light_view_proj);
         blinnPhong->setVec3("light.position", light.position);
         blinnPhong->setVec3("light.color", light.color);
         blinnPhong->setFloat("material.shininess", debug.alpha);
@@ -381,6 +389,7 @@ void Scene::Render(void)
         blinnPhong->setVec3("material.diffuse", glm::vec3(1));
         blinnPhong->setVec3("material.specular", glm::vec3(1));
         blinnPhong->setVec3("material.ambient", backgroundColor * 0.1f);
+        blinnPhong->setFloat("bias", debug.bias);
 
         suzanne->draw();
 
@@ -392,13 +401,6 @@ void Scene::Render(void)
     //Render shadow map (scene from light view)
     glBindFramebuffer(GL_FRAMEBUFFER, fboShadow);
     {
-       
-        const auto light_proj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.03f, 100.0f);
-
-        const auto light_view = glm::lookAt(light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        const auto light_view_proj = light_proj * light_view;
-
         //Setup conditions for all scopes
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -406,12 +408,10 @@ void Scene::Render(void)
         //Re-enable depth test
         glEnable(GL_DEPTH_TEST);
 
-        glViewport(0,0,800,600);
+        glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
 
         //Just clear depth buffer
         glClear(GL_DEPTH_BUFFER_BIT);
-
-        blinnPhong->setMat4("light_view_proj", light_view_proj);
 
         depthShader->use();
         depthShader->setMat4("model", objectMatrix);
@@ -461,6 +461,7 @@ void Scene::Debug(void)
     ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
     ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 1000);
     ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 1000);
+    ImGui::SliderFloat("Shadow Bias", &debug.bias, 0, 0.01);
     ImGui::ColorEdit3("Light Color", &lightColor[0]);
     ImGui::SeparatorText("Color Palette");
     ImGui::ColorEdit3("Color 1", &palette.color1[0]);

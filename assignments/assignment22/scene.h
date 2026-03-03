@@ -9,6 +9,12 @@
 #include "ew/shader.h"
 #include "ew/texture.h"
 
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
+
+const int SHADOW_WIDTH = 1024;
+const int SHADOW_HEIGHT = 1024;
+
 class Scene final : public batteries::Scene
 {
   public:

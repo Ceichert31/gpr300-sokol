@@ -32,9 +32,9 @@ void main()
   //Combine into 3x3 matrix
   vs_tangent_space = mat3(tangent,bitangent,normal);
 
+  vs_position = vec3(model * vec4(in_position, 1.0));
   vs_light_proj_pos = light_view_proj * vec4(vs_position, 1.0);
 
-  vs_position = in_position;
   vs_normal = transpose(inverse(mat3(model))) * in_normal;
   vs_texcoord = in_texcoord;
   gl_Position = view_proj * model * vec4(in_position, 1.0);

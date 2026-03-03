@@ -32,15 +32,20 @@ uniform bool normalMapOn;
 
 uniform sampler2D shadow_map;
 
+uniform float bias;
+
 float ShadowCalculation(vec4 fragPositionLightSpace){
   
   //Perspective division
   vec3 proj_coords = fragPositionLightSpace.xyz / fragPositionLightSpace.w;
 
-  float closest = texture(shadow_map, proj_coords.xy).x;
-  float current = proj_coords.z;
+  proj_coords = proj_coords * 0.5 + 0.5;
 
-  float shadow = 1.0;
+  float closest = texture(shadow_map, proj_coords.xy).r;
+  float current = proj_coords.z;
+ 
+  float shadow = current - bias > closest ? 1.0 : 0.0;
+  //float shadow = 0.75;
   return shadow;
 }
 

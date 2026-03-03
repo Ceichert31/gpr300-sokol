@@ -7,7 +7,6 @@ layout(location = 0) in vec3 in_position;
 uniform mat4 light_view_proj;
 uniform mat4 model;
 
-
 // varyings
 out vec3 vs_position;
 
