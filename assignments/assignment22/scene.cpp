@@ -482,7 +482,6 @@ void Scene::Debug(void)
     if (ImGui::CollapsingHeader("Shadow Mapping")){
         ImGui::Checkbox("Enable Shadow Filtering", &debug.enablePCF);
         ImGui::SliderFloat("Shadow Bias", &debug.bias, 0, 0.05);
-        
         if (ImGui::Button("Reset Shadow Bias")){
             debug.bias = 0.025f;
         }
