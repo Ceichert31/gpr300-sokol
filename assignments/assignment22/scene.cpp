@@ -36,10 +36,11 @@ const char* postNames[] = {
 struct{
     float alpha = 128.0f;
     bool isNormalMapOn = true;
+    bool enablePCF = true;
     float strength = 16.0f;
     float resolution = 1.0f;
     int postIndex = 0;
-    float bias = 0.005;
+    float bias = 0.025;
 } debug;
 
 struct FullScreenQuad   
@@ -198,8 +199,10 @@ void Scene::SetupShadowBuffer()
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fboShadowDepth, 0);
 
         glDrawBuffers(0, nullptr);
@@ -395,6 +398,7 @@ void Scene::Render(void)
         blinnPhong->setVec3("light.color", light.color);
         blinnPhong->setFloat("material.shininess", debug.alpha);
         blinnPhong->setInt("normalMapOn", debug.isNormalMapOn);
+        blinnPhong->setInt("enablePCF", debug.enablePCF);
 
         blinnPhong->setVec3("material.diffuse", glm::vec3(1));
         blinnPhong->setVec3("material.specular", glm::vec3(1));
@@ -409,7 +413,6 @@ void Scene::Render(void)
     glBindFramebuffer(GL_FRAMEBUFFER, fboShadow);
     {
         //Setup conditions for all scopes
-        glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
 
         //Re-enable depth test
@@ -464,22 +467,31 @@ void Scene::Debug(void)
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-    ImGui::Combo("Post Processing Effect", &debug.postIndex, postNames, IM_ARRAYSIZE(postNames));
+    if (ImGui::CollapsingHeader("Blinn Phong")){
+        ImGui::SliderFloat("Shininess", &debug.alpha, 0, 128);
+        ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
+        ImGui::ColorEdit3("Light Color", &lightColor[0]);
+    }
 
-    ImGui::SliderFloat("Alpha", &debug.alpha, 0, 128);
-    ImGui::Checkbox("Normal Mapping On", &debug.isNormalMapOn);
-    ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 1000);
-    ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 1000);
-    ImGui::SliderFloat("Shadow Bias", &debug.bias, 0, 0.05);
-    ImGui::ColorEdit3("Light Color", &lightColor[0]);
-    ImGui::SeparatorText("Color Palette");
-    ImGui::ColorEdit3("Color 1", &palette.color1[0]);
-    ImGui::ColorEdit3("Color 2", &palette.color2[0]);
+    if (ImGui::CollapsingHeader("Post Processing")){
+        ImGui::Combo("Post Processing Effect", &debug.postIndex, postNames, IM_ARRAYSIZE(postNames));
+        ImGui::SliderFloat("Effect Strength", &debug.strength, 0, 1000);
+        ImGui::SliderFloat("Effect Resolution", &debug.resolution, 0, 1000);
+    }
 
-    ImGui::Image((void*)(intptr_t)fboTexture, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
-    ImGui::Image((void*)(intptr_t)fboDepth, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
-    ImGui::Image((void*)(intptr_t)fboShadowDepth, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
+    if (ImGui::CollapsingHeader("Shadow Mapping")){
+        ImGui::Checkbox("Enable Shadow Filtering", &debug.enablePCF);
+        ImGui::SliderFloat("Shadow Bias", &debug.bias, 0, 0.05);
+        
+        if (ImGui::Button("Reset Shadow Bias")){
+            debug.bias = 0.025f;
+        }
 
+        ImGui::SeparatorText("Debug Textures");
+        ImGui::Image((void*)(intptr_t)fboTexture, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
+        ImGui::Image((void*)(intptr_t)fboDepth, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
+        ImGui::Image((void*)(intptr_t)fboShadowDepth, ImVec2(400,300), ImVec2(0,1), ImVec2(1,0));
+    }
     ImGui::Checkbox("Paused", &time.paused);
     ImGui::SliderFloat("Time Factor", &time.factor, 0.0f, 10.0f);
 

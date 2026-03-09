@@ -29,6 +29,7 @@ uniform Material material;
 uniform sampler2D main_texture;
 uniform sampler2D normal_map;
 uniform bool normalMapOn;
+uniform bool enablePCF;
 
 uniform sampler2D shadow_map;
 
@@ -41,11 +42,33 @@ float ShadowCalculation(vec4 fragPositionLightSpace) {
 
   proj_coords = proj_coords * 0.5 + 0.5;
 
+  float shadow = 0.0;
+
+  //Sample mipmap level 0 for texel size
+  vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
+
   float closest = texture(shadow_map, proj_coords.xy).r;
   float current = proj_coords.z;
- 
-  float shadow = current - bias > closest ? 1.0 : 0.0;
-  //float shadow = 0.75;
+
+  if (enablePCF){
+    for (int i = -1; i <= 1; ++i)
+      {
+      for (int j = -1; j <= 1; ++j)
+        {
+          float pcfDepth = texture(shadow_map, proj_coords.xy + vec2(i,j) * texelSize).r;
+          shadow += current - bias > pcfDepth ? 1.0 : 0.0;
+        }
+      }
+
+    return shadow /= 9.0;
+  }
+
+  shadow = current - bias > closest ? 1.0 : 0.0;
+
+  if (proj_coords.z > 1.0){
+    shadow = 0.0;
+  }
+
   return shadow;
 }
 
