@@ -15,6 +15,8 @@ class Scene final : public batteries::Scene
     Scene();
     virtual ~Scene();
 
+    void CacheInstanceData();
+
     void Update(float dt);
     void PostProcess(ew::Shader* shader);
     void Render(void);
@@ -30,6 +32,8 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Texture> noiseTexture;
 
     batteries::light_t light;
+
+    std::vector<glm::mat4> modelInstances;
 
     struct {
       glm::vec3 color1;
@@ -51,4 +55,7 @@ class Scene final : public batteries::Scene
     unsigned int framebuffer;
     unsigned int fboTexture;
     unsigned int fboDepth;
+
+    //instanced buffer
+    unsigned int instancedBuffer;
 };

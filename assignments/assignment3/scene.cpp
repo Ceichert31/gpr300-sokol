@@ -38,6 +38,8 @@ struct{
     float strength = 16.0f;
     float resolution = 1.0f;
     int postIndex = 0;
+    int width = 3;
+    float spacing = 1.0f;
 } debug;
 
 struct FullScreenQuad   
@@ -94,12 +96,29 @@ struct FullScreenQuad
     }
 } fullscreenQuad;
 
+void Scene::CacheInstanceData()
+{
+    // auto size = (debug.width - (-debug.width + 1) * debug.width - (-debug.width + 1));
+    // modelInstances.resize(size);
+    // auto i = 0;
+
+
+    // for (auto x = -debug.width; x <= debug.width; x++){
+    //     for (auto y = -debug.width; y <= debug.width; y++, i++){
+    //             auto position = glm::vec3(x * debug.spacing, 0, y * debug.spacing);
+    //             auto matrix = glm::translate(glm::mat4(1.0f), position);
+
+    //             modelInstances[i] = matrix;
+    //         }
+    //     }
+}
+
 Scene::Scene()
 {
-    suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
+    suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj", true);
 
     //Blinn phong
-    blinnPhong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhong.vs", "assets/shaders/BlinnPhong.fs");
+    blinnPhong = std::make_unique<ew::Shader>("assets/shaders/BlinnPhongInstanced.vs", "assets/shaders/BlinnPhong.fs");
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/fullscreen.fs"));
     //Blur
     postEffects.push_back(std::make_unique<ew::Shader>("assets/shaders/fullscreen.vs", "assets/shaders/PostEffects/BoxBlur.fs"));
@@ -121,6 +140,8 @@ Scene::Scene()
     mainTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
     normalTexture = std::make_unique<ew::Texture>("assets/textures/Bricks_Normal.jpg");
     noiseTexture = std::make_unique<ew::Texture>("assets/textures/Noise.png");
+
+    // CacheInstanceData();
 
     light = {
         .brightness = 1.0f,
@@ -172,8 +193,14 @@ Scene::Scene()
         printf("Warning! Frame buffer is not complete!\n");
     }
 
-    //Unbind framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // //Unbind framebuffer
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // glGenBuffers(1, &instancedBuffer);
+    // glBindBuffer(GL_ARRAY_BUFFER, instancedBuffer);
+
+    // //Should be GL_STATIC_DRAW when not debugging
+    // glBufferData(GL_ARRAY_BUFFER, 100 * sizeof(glm::mat4), &modelInstances[0], GL_DYNAMIC_DRAW);
 }
 
 Scene::~Scene()
@@ -276,7 +303,7 @@ void Scene::Render(void)
         blinnPhong->setInt("main_texture", 0);
         blinnPhong->setInt("normal_map", 1);
 
-        blinnPhong->setMat4("model", objectMatrix);
+   
         blinnPhong->setMat4("view_proj", view_proj);
         blinnPhong->setVec3("camera", camera.position);
 
@@ -289,7 +316,15 @@ void Scene::Render(void)
         blinnPhong->setVec3("material.specular", glm::vec3(1));
         blinnPhong->setVec3("material.ambient", backgroundColor * 0.1f);
 
-        suzanne->draw();
+        // auto i = 0;
+        // for (auto x = -debug.width; x <= debug.width; x++){
+        //     for (auto y = -debug.width; y <=debug.width; y++, i++){
+        //         blinnPhong->setMat4("model", modelInstances[i]);
+        //         suzanne->draw(debug.width * debug.width);
+        //     }
+        // }
+
+        suzanne->draw(debug.width * debug.width);
     }
 
     //Clear framebuffer
@@ -326,6 +361,11 @@ void Scene::Debug(void)
     cameracontroller.Debug();
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+    ImGui::SliderFloat("Spacing", &debug.spacing, 1, 100);
+    if (ImGui::SliderInt("Width", &debug.width, 1, 100)){
+        CacheInstanceData();
+    }
 
     ImGui::Combo("Post Processing Effect", &debug.postIndex, postNames, IM_ARRAYSIZE(postNames));
 
