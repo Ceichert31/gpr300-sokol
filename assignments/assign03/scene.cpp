@@ -82,7 +82,7 @@ struct Framebuffer
             glBindTexture(GL_TEXTURE_2D, position);
 
             //Create 800/600 render texture with 8 unsigned bytes
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA8, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -97,7 +97,7 @@ struct Framebuffer
             glBindTexture(GL_TEXTURE_2D, normal);
 
             //Create 800/600 render texture with 8 unsigned bytes
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA8, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -112,7 +112,7 @@ struct Framebuffer
             glBindTexture(GL_TEXTURE_2D, albedo);
 
             //Create 800/600 render texture with 8 unsigned bytes
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA8, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -127,7 +127,7 @@ struct Framebuffer
             glBindTexture(GL_TEXTURE_2D, material);
 
             //Create 800/600 render texture with 8 unsigned bytes
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA8, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -211,11 +211,11 @@ Scene::Scene()
 {
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
     geometry = std::make_unique<ew::Shader>("assets/shaders/deferred/geometry.vs", "assets/shaders/deferred/geometry.fs");
-    blinnphong = std::make_unique<ew::Shader>("assets/shaders/deferred/blinnphong.vs", "assets/shaders/deferred/blinnphong.fs");
-    noprocess = std::make_unique<ew::Shader>("assets/shaders/deferred/default.vs", "assets/shaders/deferred/default.fs");
-    lightsphere = std::make_unique<ew::Shader>("assets/shaders/deferred/light.vs", "assets/shaders/deferred/light.fs");
+    //blinnphong = std::make_unique<ew::Shader>("assets/shaders/deferred/blinnphong.vs", "assets/shaders/deferred/blinnphong.fs");
+    //noprocess = std::make_unique<ew::Shader>("assets/shaders/deferred/default.vs", "assets/shaders/deferred/default.fs");
+    //lightsphere = std::make_unique<ew::Shader>("assets/shaders/deferred/light.vs", "assets/shaders/deferred/light.fs");
     
-    texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
+    //texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
 
     sphere.load(ew::createSphere(1.0f, 8));
 
@@ -225,8 +225,8 @@ Scene::Scene()
     };
 
     framebuffer.Initialize();
-    lightvolumebuffer.Initialize();
-    fullscreen_quad.Initialize();
+    //lightvolumebuffer.Initialize();
+    //fullscreen_quad.Initialize();
 
     InitializeInstanceData();
 }
