@@ -16,6 +16,7 @@ constexpr int kFramebufferHeight = 600;
 constexpr float orbit_radius = 2.0f;
 constexpr glm::vec4 light_orbit_radius = {2.0f, 4.0f, -4.0f, 1.0f};
 
+#pragma region Structs
 struct FullscreenQuad
 {
     GLuint vao;
@@ -203,7 +204,9 @@ struct
     float light_radius = 2.5f;
     bool draw_light_volume = false;
 } debug;
+#pragma endregion
 
+#pragma region Setup/Cleanup
 Scene::Scene()
 {
     suzanne = std::make_unique<ew::Model>("assets/models/suzanne.obj");
@@ -258,7 +261,9 @@ void Scene::InitializeInstanceData(void)
         }
     }
 }
+#pragma endregion
 
+#pragma region Update Loop
 void Scene::Update(float dt)
 {
     batteries::Scene::Update(dt);
@@ -370,3 +375,4 @@ void Scene::Debug(void)
     }
     ImGui::End();
 }
+#pragma endregion
