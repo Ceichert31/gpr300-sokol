@@ -25,5 +25,5 @@ uniform Material material;
 
 void main()
 {
-  FragLighting = vec4(0.0, 0.3, 0.7, 1.0);
+  FragLighting = vec4(light.color, 1.0);
 }

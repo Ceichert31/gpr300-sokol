@@ -242,7 +242,7 @@ Scene::Scene()
     geometry = std::make_unique<ew::Shader>("assets/shaders/deferred/geometry.vs", "assets/shaders/deferred/geometry.fs");
     blinnphong = std::make_unique<ew::Shader>("assets/shaders/deferred/blinnphong.vs", "assets/shaders/deferred/blinnphong.fs");
     noprocess = std::make_unique<ew::Shader>("assets/shaders/deferred/fullscreen.vs", "assets/shaders/deferred/fullscreen.fs");
-    //lightsphere = std::make_unique<ew::Shader>("assets/shaders/deferred/light.vs", "assets/shaders/deferred/light.fs");
+    lightsphere = std::make_unique<ew::Shader>("assets/shaders/deferred/light.vs", "assets/shaders/deferred/light.fs");
     
     //texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
 
@@ -413,7 +413,41 @@ void Scene::Render(void)
     }
     #pragma endregion
 
-    { // render light sources
+    #pragma region Render Light Sources (Forward Render)
+    { 
+        if (!debug.draw_light_volume) return;
+
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        glClearColor(0.0f,0.0f,0.0f,0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        //Blit the old depth buffer onto the current forward rendering
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(
+            0, 0, 
+            framebuffer.kFrameBufferWidth, 
+            framebuffer.kFrameBufferHeight,
+            0, 0, 
+            framebuffer.kFrameBufferWidth, 
+            framebuffer.kFrameBufferHeight, 
+            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        lightsphere->use();
+        lightsphere->setMat4("view_proj", view_proj);
+
+        for (auto light : light_instances){
+            auto sphere_mat4 = glm::translate(glm::mat4(1), light.position);
+
+            lightsphere->setMat4("model", sphere_mat4);
+            lightsphere->setVec3("color", light.color);
+            sphere.draw(ew::DrawMode::LINES);
+        }
     }
 }
 
