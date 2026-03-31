@@ -10,9 +10,6 @@
 // imgui
 #include "imgui/imgui.h"
 
-constexpr int kFramebufferWidth = 800;
-constexpr int kFramebufferHeight = 600;
-
 constexpr float orbit_radius = 2.0f;
 constexpr glm::vec4 light_orbit_radius = {2.0f, 4.0f, -4.0f, 1.0f};
 
@@ -438,6 +435,7 @@ void Scene::Render(void)
             GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        //Draw lighting volumes 
         lightsphere->use();
         lightsphere->setMat4("view_proj", view_proj);
 
@@ -449,6 +447,7 @@ void Scene::Render(void)
             sphere.draw(ew::DrawMode::LINES);
         }
     }
+    #pragma endregion
 }
 
 void Scene::Debug(void)
