@@ -124,7 +124,7 @@ struct Framebuffer
             glBindTexture(GL_TEXTURE_2D, material);
 
             //Create 800/600 render texture with 8 unsigned bytes
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, kFrameBufferWidth, kFrameBufferHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

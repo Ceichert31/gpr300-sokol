@@ -27,6 +27,12 @@ uniform vec3 camera;
 //Material.b = specular
 //Material.a = shininess
 
+///Calculate exponential light attenuation
+float calculateAttenuation(float distance, float radius){
+  float i = clamp(1.0 - pow(distance/radius, 4.0), 0.0, 1.0);
+  return i * i;
+}
+
 vec3 blinnPhong(){
 
   vec2 uv = gl_FragCoord.xy / screenSize;
@@ -51,8 +57,12 @@ vec3 blinnPhong(){
   vec3 ambient = albedo.rgb;
 
   //Direction calculations
+  vec3 lightDirection = light.position - fragPosition;
+  float lightAttenuation = calculateAttenuation(length(lightDirection), light.radius);
+
+  lightDirection = normalize(lightDirection);
+
   vec3 viewDirection = normalize(camera - fragPosition);
-  vec3 lightDirection = normalize(light.position - fragPosition);
   vec3 halfwayDirection = normalize(lightDirection + viewDirection);
 
   //Diffuse calculation
@@ -61,7 +71,7 @@ vec3 blinnPhong(){
   //Specular calculation
   vec3 specular = pow(max(dot(normal, halfwayDirection), 0.0), material.a * 128.0) * vec3(material.b);
 
-  return (ambient * material.r + diffuse * material.g + specular) * light.color;
+  return (ambient * material.r + diffuse * material.g + specular) * light.color * lightAttenuation;
 }
 
 void main()
