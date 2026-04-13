@@ -373,13 +373,14 @@ void Scene::Render(void)
         blinnphong->setInt("g_albedo", 2);
         blinnphong->setInt("g_material", 3);
 
-        for (auto light : light_instances){
+        for (int i = 0; i < light_instances.size(); ++i){
             //Lighting data
-            blinnphong->setVec3("light.position", light.position);
-            blinnphong->setVec3("light.color", light.color);
+            blinnphong->setVec3("lights[" + std::to_string(i) + "].position",  light_instances[i].position);
+            blinnphong->setVec3("lights[" + std::to_string(i) + "].color", light_instances[i].color);
+            blinnphong->setFloat("lights[" + std::to_string(i) + "].radius", debug.light_radius);
 
             //Model data
-            auto sphere_mat4 = glm::translate(glm::mat4(1), light.position);
+            auto sphere_mat4 = glm::translate(glm::mat4(1), light_instances[i].position);
             blinnphong->setMat4("model", sphere_mat4);
 
             //Render spheres

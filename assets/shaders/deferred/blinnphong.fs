@@ -7,6 +7,7 @@ in vec2 vs_texcoord;
 struct Light{
   vec3 color;
   vec3 position;
+  float radius;
 };
 
 struct Material{
@@ -21,32 +22,45 @@ uniform sampler2D g_normal;
 uniform sampler2D g_albedo;
 uniform sampler2D g_material;
 
+const int LIGHT_COUNT = 64;
+uniform Light lights[LIGHT_COUNT];
+
 uniform vec3 camera;
-uniform Light light;
 uniform Material material;
 
-vec3 blinnPhong(vec3 position, vec3 normal, Material material){
+vec3 blinnPhong(){
 
-  vec3 view_dir = normalize(camera - position);
-  vec3 light_dir = normalize(light.position - position);
-  vec3 reflect_dir = reflect(light_dir, normal);
-  vec3 half_dir = normalize(light_dir + view_dir);
+  //Sample from G-Buffer
+  vec3 fragPosition = texture(g_position, vs_texcoord).rgb;
+  vec3 normal = texture(g_normal, vs_texcoord).rgb;
+  vec3 albedo = texture(g_albedo, vs_texcoord).rgb;
 
-  //Calculate diffuse lighting (light diffusion w/ normal)
-  float diffuse = max(dot(normal, light_dir), 0);
+  //Apply ambient factor to lighting
+  vec3 lighting = albedo * material.ambient;
 
-  //Calculate specular lighting
-  float specular = max(dot(normal, half_dir), 0);
-  specular = pow(specular, 128 * material.shininess);
+  vec3 viewDirection = normalize(camera - fragPosition);
 
-  //Our uncolored lighting model
-  vec3 lighting = diffuse * material.diffuse + specular * material.specular + material.ambient;
+  //Iterate through lights and calculate diffuse
+  for (int i = 0; i < LIGHT_COUNT; ++i){
 
-  return lighting * light.color;
+    float volumeDistance = length(lights[i].position - fragPosition);
+
+    //Skip Diffuse lighting if outside of volume radius
+    if (volumeDistance > lights[i].radius)
+      continue;
+
+    vec3 lightDirection = normalize(lights[i].position - fragPosition);
+
+    vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo * lights[i].color;
+
+    lighting += diffuse;
+  }
+
+  return lighting;
 }
 
 void main()
 {
-  vec3 lighting = blinnPhong(texture(g_position, vs_texcoord).rgb, texture(g_normal, vs_texcoord).rgb, material);
-  FragLighting = vec4(lighting, 1.0) * texture(g_albedo, vs_texcoord);
+  vec3 lighting = blinnPhong();
+  FragLighting = vec4(lighting, 1.0);
 }
