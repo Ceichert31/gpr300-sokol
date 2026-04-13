@@ -22,6 +22,8 @@ uniform sampler2D g_normal;
 uniform sampler2D g_albedo;
 uniform sampler2D g_material;
 
+uniform vec2 screenSize;
+
 uniform Light light;
 
 uniform vec3 camera;
@@ -29,8 +31,10 @@ uniform Material material;
 
 vec3 blinnPhong(){
 
+  vec2 uv = gl_FragCoord.xy / screenSize;
+
   //Sample from G-Buffer
-  vec3 fragPosition = texture(g_position, vs_texcoord).rgb;
+  vec3 fragPosition = texture(g_position, uv).rgb;
 
   float volumeDistance = length(light.position - fragPosition);
 
@@ -38,14 +42,13 @@ vec3 blinnPhong(){
   if (volumeDistance > light.radius)
     discard;
 
-  vec3 normal = texture(g_normal, vs_texcoord).rgb;
+  vec3 normal = texture(g_normal, uv).rgb;
 
   //Albedo alpha channel is specular
-  vec4 albedo = texture(g_albedo, vs_texcoord);
+  vec4 albedo = texture(g_albedo, uv);
   
-
   //Apply ambient factor to lighting
-  vec3 lighting = albedo.rgb * material.ambient;
+  vec3 lighting = material.ambient;
 
   vec3 viewDirection = normalize(camera - fragPosition);
 

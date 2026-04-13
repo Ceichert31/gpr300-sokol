@@ -182,7 +182,7 @@ struct LighVolumebuffer
             glBindTexture(GL_TEXTURE_2D, color);
 
             //Create 800/600 render texture with 8 unsigned bytes
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, kVolumeBufferWidth, kVolumeBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, kVolumeBufferWidth, kVolumeBufferHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -241,7 +241,7 @@ Scene::Scene()
     noprocess = std::make_unique<ew::Shader>("assets/shaders/deferred/fullscreen.vs", "assets/shaders/deferred/fullscreen.fs");
     lightsphere = std::make_unique<ew::Shader>("assets/shaders/deferred/light.vs", "assets/shaders/deferred/light.fs");
     
-    //texture = std::make_unique<ew::Texture>("assets/brick_color.jpg");
+    brickTexture = std::make_unique<ew::Texture>("assets/textures/Bricks.jpg");
 
     sphere.load(ew::createSphere(1.0f, 8));
     plane.load(ew::createPlane(100, 100, 1));
@@ -311,10 +311,15 @@ void Scene::Render(void)
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
         //Setup shader program
         geometry->use();
 
         geometry->setMat4("view_proj", view_proj);
+
+        geometry->setInt("objectTexture", 0);
 
         geometry->setFloat("material.ambient", material.ambient);
         geometry->setFloat("material.diffuse", material.diffuse);
@@ -351,7 +356,7 @@ void Scene::Render(void)
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glCullFace(GL_FRONT);
 
         //Clear buffer
         glClearColor(0.0f,0.0f,0.0f,0.0f);
@@ -378,6 +383,7 @@ void Scene::Render(void)
         blinnphong->setInt("g_normal", 1);
         blinnphong->setInt("g_albedo", 2);
         blinnphong->setInt("g_material", 3);
+        blinnphong->setVec2("screenSize", glm::vec2(framebuffer.kFrameBufferWidth, framebuffer.kFrameBufferHeight));
 
         for (int i = 0; i < light_instances.size(); ++i){
             //Lighting data
@@ -386,7 +392,7 @@ void Scene::Render(void)
             blinnphong->setFloat("light.radius", debug.light_radius);
 
             //Model data
-            auto sphere_mat4 = glm::translate(glm::mat4(1), light_instances[i].position);
+            auto sphere_mat4 = glm::translate(glm::mat4(1.0), light_instances[i].position) * glm::scale(glm::mat4(1.0), glm::vec3(debug.light_radius));
             blinnphong->setMat4("model", sphere_mat4);
 
             //Render spheres
@@ -401,19 +407,25 @@ void Scene::Render(void)
 
         noprocess->use();
         noprocess->setInt("screen", 0);
+        noprocess->setInt("lighting", 1);
 
         glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        glClear(GL_COLOR_BUFFER_BIT);
+        
         glBindVertexArray(fullscreen_quad.vao);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, framebuffer.material);
+        glBindTexture(GL_TEXTURE_2D, framebuffer.albedo);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, lightvolumebuffer.color);
+
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
     }
     #pragma endregion
 
@@ -421,13 +433,13 @@ void Scene::Render(void)
     { 
         if (!debug.draw_light_volume) return;
 
-        glDisable(GL_BLEND);
+        //glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        //glEnable(GL_CULL_FACE);
+        //glCullFace(GL_BACK);
 
-        glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // glClearColor(0.0f,0.0f,0.0f,0.0f);
+        // glClear(GL_COLOR_BUFFER_BIT);
         
         //Blit the old depth buffer onto the current forward rendering
         glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.fbo);
@@ -439,18 +451,19 @@ void Scene::Render(void)
             0, 0, 
             framebuffer.kFrameBufferWidth, 
             framebuffer.kFrameBufferHeight, 
-            GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         //Draw lighting volumes 
         lightsphere->use();
-        lightsphere->setMat4("view_proj", view_proj);
+       
 
         for (auto light : light_instances){
             auto sphere_mat4 = glm::translate(glm::mat4(1), light.position);
 
             sphere_mat4 = glm::scale(sphere_mat4, glm::vec3(debug.light_radius));
 
+            lightsphere->setMat4("view_proj", view_proj);
             lightsphere->setMat4("model", sphere_mat4);
             lightsphere->setVec3("color", light.color);
             sphere.draw(ew::DrawMode::LINES);

@@ -31,7 +31,7 @@ class Scene final : public batteries::Scene
     std::unique_ptr<ew::Shader> blinnphong;
     std::unique_ptr<ew::Shader> noprocess;
     std::unique_ptr<ew::Shader> lightsphere;
-    std::unique_ptr<ew::Texture> texture;
+    std::unique_ptr<ew::Texture> brickTexture;
 
     batteries::ambient_t ambient;
     batteries::light_t light;

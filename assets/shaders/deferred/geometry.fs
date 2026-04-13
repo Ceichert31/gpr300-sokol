@@ -18,11 +18,13 @@ in vec3 vs_position;
 in vec3 vs_normal;
 in vec2 vs_texcoord;
 
+uniform sampler2D objectTexture;
+
 uniform Material material;
 
 void main()
 {
-    vec3 object_color = vs_normal.rgb * 0.5 + 0.5;
+    vec3 object_color = texture(objectTexture, vs_texcoord).rgb;
     frag_position = vec4(vs_position.xyz, 1.0);
     frag_normal = vec4(vs_normal.xyz, 1.0);
     frag_albedo = vec4(object_color, 1.0);
