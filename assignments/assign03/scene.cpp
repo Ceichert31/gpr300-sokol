@@ -312,7 +312,7 @@ void Scene::Render(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, brickTexture->getID());
 
         //Setup shader program
         geometry->use();
@@ -326,8 +326,7 @@ void Scene::Render(void)
         geometry->setFloat("material.specular", material.specular);
         geometry->setFloat("material.shininess", material.shininess);
 
-
-        auto planeTransform = glm::translate(glm::mat4(1.0), glm::vec3(0, -10, 0));
+        auto planeTransform = glm::translate(glm::mat4(1.0), glm::vec3(0, -2, 0));
         geometry->setMat4("model", planeTransform);
         plane.draw();
 
@@ -432,14 +431,7 @@ void Scene::Render(void)
     #pragma region Render Light Sources (Forward Render)
     { 
         if (!debug.draw_light_volume) return;
-
-        //glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
-        //glCullFace(GL_BACK);
-
-        // glClearColor(0.0f,0.0f,0.0f,0.0f);
-        // glClear(GL_COLOR_BUFFER_BIT);
         
         //Blit the old depth buffer onto the current forward rendering
         glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.fbo);

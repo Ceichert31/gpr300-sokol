@@ -10,13 +10,6 @@ struct Light{
   float radius;
 };
 
-struct Material{
-  vec3 ambient;
-  vec3 diffuse;
-  vec3 specular;
-  float shininess;
-};
-
 uniform sampler2D g_position;
 uniform sampler2D g_normal;
 uniform sampler2D g_albedo;
@@ -27,7 +20,12 @@ uniform vec2 screenSize;
 uniform Light light;
 
 uniform vec3 camera;
-uniform Material material;
+
+//Material breakdown:
+//Material.r = ambient
+//Material.g = diffuse
+//Material.b = specular
+//Material.a = shininess
 
 vec3 blinnPhong(){
 
@@ -47,24 +45,23 @@ vec3 blinnPhong(){
   //Albedo alpha channel is specular
   vec4 albedo = texture(g_albedo, uv);
   
+  vec4 material = texture(g_material, uv);
+
   //Apply ambient factor to lighting
-  vec3 lighting = material.ambient;
+  vec3 ambient = albedo.rgb;
 
+  //Direction calculations
   vec3 viewDirection = normalize(camera - fragPosition);
-
- //Diffuse calculation
   vec3 lightDirection = normalize(light.position - fragPosition);
-  vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo.rgb * light.color * material.diffuse;
-  lighting += diffuse;
+  vec3 halfwayDirection = normalize(lightDirection + viewDirection);
+
+  //Diffuse calculation
+  vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo.rgb;
 
   //Specular calculation
-  vec3 halfwayDirection = normalize(lightDirection + viewDirection);
-  float spec = pow(max(dot(normal, halfwayDirection), 0.0), material.shininess);
+  vec3 specular = pow(max(dot(normal, halfwayDirection), 0.0), material.a * 128.0) * vec3(material.b);
 
-  vec3 specular = light.color * spec * albedo.a;
-  lighting += specular;
-
-  return lighting;
+  return (ambient * material.r + diffuse * material.g + specular) * light.color;
 }
 
 void main()
