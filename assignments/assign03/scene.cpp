@@ -155,7 +155,7 @@ struct Framebuffer
         // check completeness
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
-            printf("Not so victorious\n");
+            printf("Framebuffer failed to initialize!\n");
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
