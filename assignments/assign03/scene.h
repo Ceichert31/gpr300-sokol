@@ -36,6 +36,7 @@ class Scene final : public batteries::Scene
     batteries::ambient_t ambient;
     batteries::light_t light;
     ew::Mesh sphere;
+    ew::Mesh plane;
 
     std::vector<glm::mat4> model_instances;
     std::vector<batteries::light_t> light_instances;
